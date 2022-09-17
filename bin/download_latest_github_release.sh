@@ -16,12 +16,20 @@ latest_release=$(curl \
   | htmlq --attribute href 'a' \
   | grep '/tag/')
 
+echo latest_release=$latest_release
+
 asset_link=$(curl \
   -s \
   ${github}${latest_release} \
  | htmlq --attribute src 'include-fragment' \
  | grep 'https')
 
-download_url=${github}$(curl -s $asset_link | htmlq --attribute href 'a' | grep -v 'archive/refs/tags')
+if [ -z "$asset_link" ]; then
+  asset_link=${github}${latest_release}
+  download_url=${github}$(curl -s $asset_link | htmlq --attribute href 'a' | grep 'download')
+else
+  download_url=${github}$(curl -s $asset_link | htmlq --attribute href 'a' | grep -v 'archive/refs/tags')
+fi
 
+echo download_url=$download_url
 curl -s --location -o "$output_file" "$download_url"
