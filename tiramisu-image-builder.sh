@@ -52,7 +52,8 @@ done
 
 image_hash=$(docker images -q tiramisu:latest)
 if [ -z "$image_hash" ] || [ "$force_rebuild" == "true" ]; then
-  docker build . -t tiramisu
+  docker build . -t tiramisu --no-cache
+  image_hash=$(docker images -q tiramisu:latest)
 fi
 
 # NB: The container needs to run as privileged so the container can

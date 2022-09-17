@@ -3,6 +3,9 @@
 block_size=1000000
 size_unit=gb
 
+tiramisu_zip=/root/tiramisu.zip
+sigpatches_rpx=/root/01_sigpatches.rpx
+
 if [ -z "$1" ]; then
   echo "usage: $(basename $0) <image size in gb>"
   exit 1
@@ -12,6 +15,15 @@ if [[ $1 =~ [^0-9] ]]; then
   echo "error: <image size in gb> must be an integer"
   exit 1
 fi
+
+for file in $tiramisu_zip $sigpatches_rpx; do
+  if [ -e "$file" ]; then
+    sha1sum $file
+  else
+    echo "FATAL: critical file $file missing. Aborting image creation."
+    exit 1
+  fi
+done
 
 if [ "$2" == "--bytes" ]; then
   size_unit=b
@@ -63,10 +75,10 @@ mkdir -p /mnt/image
 mount -o loop $image /mnt/image || die "failed"
 
 echo "Extracting tiramisu..."
-unzip /root/tiramisu.zip -d /mnt/image || die "failed"
+unzip $tiramisu_zip -d /mnt/image || die "failed"
 
 echo "Copying sigpatcher..."
-cp /root/01_sigpatches.rpx /mnt/image/wiiu/environments/tiramisu/modules/setup/ || die "failed"
+cp $sigpatches_rpx /mnt/image/wiiu/environments/installer/modules/setup || die "failed"
 
 echo "Done"
 exit 0
