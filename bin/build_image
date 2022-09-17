@@ -1,22 +1,35 @@
 #!/usr/bin/env bash
 
 block_size=1000000
-size_gb=$1
+size_unit=gb
 
-if [ -z "$size_gb" ]; then
+if [ -z "$1" ]; then
   echo "usage: $(basename $0) <image size in gb>"
   exit 1
 fi
 
-if [[ $size_gb =~ [^0-9] ]]; then
+if [[ $1 =~ [^0-9] ]]; then
   echo "error: <image size in gb> must be an integer"
   exit 1
+fi
+
+if [ "$2" == "--bytes" ]; then
+  size_unit=b
 fi
 
 die() {
   echo "$@"
   exit 1
 }
+
+case $size_unit in
+  b)
+    size_bytes=$1
+    ;;
+  gb)
+    size_bytes=$(( 1000 * 1000 * 1000 * $1 ))
+    ;;
+esac
 
 expected_size() {
   local file=$1
@@ -31,8 +44,10 @@ expected_size() {
   [ $actual_size -eq $size_bytes ]
 }
 
-size_bytes=$(( 1000 * 1000 * 1000 * $size_gb ))
+# This will trim the image to the nearest number of blocks, minimizing
+# wasted space.
 count=$(( $size_bytes / $block_size ))
+size_bytes=$(( $count * $block_size ))
 image=/mnt/work/disk.img
 
 if ! expected_size $image $size_bytes; then

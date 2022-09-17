@@ -15,7 +15,7 @@ for param in $@; do
   if [ -z "$is_switch" ]; then
     container_params+=($param)
   else
-    if [ ${#ArrayName[@]} -eq 0 ]; then
+    if [ ${#container_params[@]} -eq 0 ]; then
       case $param in
         --rebuild)
           force_rebuild=true
@@ -23,7 +23,7 @@ for param in $@; do
         --help)
           cat << EOF
 Tiramisu SD card image builder
-usage: $(basename $0) [--rebuild] <size>
+usage: $(basename $0) [--rebuild] <size> [--bytes]
 
 <size> should be the size of your SD card, in gigabytes (base 10) **not** 
 gibibytes (base 2). Generally, this will be the manufacturer's advertised size
@@ -31,6 +31,7 @@ printed on the SD card label.
 
 Options:
   --rebuild      Forces the Docker container to be rebuilt
+  --bytes        interpret <size> as bytes instead of GB.
 
 The image will be saved in your working directory as "disk.img" and can be
 flashed to your SD card using an image flashing tool such as Balena Etcher.
