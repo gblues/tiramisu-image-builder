@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+
+block_size=1000000
+size_gb=$1
+
+if [ -z "$size_gb" ]; then
+  echo "usage: $(basename $0) <image size in gb>"
+  exit 1
+fi
+
+if [[ $size_gb =~ [^0-9] ]]; then
+  echo "error: <image size in gb> must be an integer"
+  exit 1
+fi
+
+die() {
+  echo "$@"
+  exit 1
+}
+
+expected_size() {
+  local file=$1
+  local size_bytes=$2
+
+  if [ ! -e "$file" ]; then
+    return 1
+  fi
+
+  actual_size=$(stat $file -c '%s')
+
+  [ $actual_size -eq $size_bytes ]
+}
+
+size_bytes=$(( 1000 * 1000 * 1000 * $size_gb ))
+count=$(( $size_bytes / $block_size ))
+image=/mnt/work/disk.img
+
+if ! expected_size $image $size_bytes; then
+  echo "Creating emtpy disk image..."
+  dd if=/dev/zero of=$image bs=$block_size count=$count || die "failed"
+fi
+
+echo "Formating disk image for fat32..."
+mkfs.vfat -S 512 -s 64 $image || die "failed"
+
+echo "Mounting disk image..."
+mkdir -p /mnt/image
+mount -o loop $image /mnt/image || die "failed"
+
+echo "Extracting tiramisu..."
+unzip /root/tiramisu.zip -d /mnt/image || die "failed"
+
+echo "Copying sigpatcher..."
+cp /root/01_sigpatches.rpx /mnt/image/wiiu/environments/tiramisu/modules/setup/ || die "failed"
+
+echo "Done"
+exit 0
