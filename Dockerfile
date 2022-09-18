@@ -13,7 +13,10 @@ COPY bin /usr/local/bin
 RUN tar zxf /tmp/htmlq.tgz -C /usr/local/bin && \
   chmod u+x /usr/local/bin/htmlq && \
   /usr/local/bin/download_latest_github_release.sh wiiu-env/Tiramisu /root/tiramisu.zip && \
-  /usr/local/bin/download_latest_github_release.sh marco-calautti/SigpatchesModuleWiiU /root/01_sigpatches.rpx
+  /usr/local/bin/download_latest_github_release.sh marco-calautti/SigpatchesModuleWiiU /root/01_sigpatches.rpx && \
+  /usr/local/bin/download_latest_github_release.sh GaryOderNichts/UFDiine /root/ufdiine.zip && \
+  /usr/local/bin/download_latest_github_release.sh GaryOderNichts/Bloopair /root/bloopair.zip && \
+  curl --location -s https://github.com/fortheusers/hb-appstore/releases/download/2.2/wiiu-extracttosd.zip -o /root/appstore.zip
 
 # container entrypoint script
 ENTRYPOINT ["/usr/local/bin/build_image"]

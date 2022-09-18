@@ -5,6 +5,9 @@ size_unit=gb
 
 tiramisu_zip=/root/tiramisu.zip
 sigpatches_rpx=/root/01_sigpatches.rpx
+ufdiine_zip=/root/ufdiine.zip
+bloopair_zip=/root/bloopair.zip
+appstore_zip=/root/appstore.zip
 
 if [ -z "$1" ]; then
   echo "usage: $(basename $0) <image size in gb>"
@@ -16,7 +19,7 @@ if [[ $1 =~ [^0-9] ]]; then
   exit 1
 fi
 
-for file in $tiramisu_zip $sigpatches_rpx; do
+for file in $tiramisu_zip $ufdiine_zip $sigpatches_rpx $bloopair_zip $appstore_zip; do
   if [ -e "$file" ]; then
     sha1sum $file
   else
@@ -76,6 +79,9 @@ mount -o loop $image /mnt/image || die "failed"
 
 echo "Extracting tiramisu..."
 unzip $tiramisu_zip -d /mnt/image || die "failed"
+unzip $ufdiine_zip -d /mnt/image || die "failed"
+unzip $bloopair_zip -d /mnt/image || die "failed"
+unzip $appstore_zip -d /mnt/image || die "failed"
 
 echo "Copying sigpatcher..."
 cp $sigpatches_rpx /mnt/image/wiiu/environments/installer/modules/setup || die "failed"
